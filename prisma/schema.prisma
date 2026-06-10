@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String?  // Links to the Google Auth user ID if needed
+
+  linksSource Link[] @relation("sourceLinks")
+  linksTarget Link[] @relation("targetLinks")
+}
+
+model Link {
+  id        String @id @default(uuid())
+  sourceId  String
+  targetId  String
+  
+  source    Note   @relation("sourceLinks", fields: [sourceId], references: [id], onDelete: Cascade)
+  target    Note   @relation("targetLinks", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId])
+}

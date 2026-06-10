@@ -1,0 +1,51 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# ─── Dependencies ────────────────────────────────────────────────
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ─── Testing ─────────────────────────────────────────────────────
+/coverage
+
+# ─── Next.js Build Output ────────────────────────────────────────
+/.next/
+/out/
+/build
+
+# ─── Environment & Secrets (NEVER commit these) ──────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Vercel ──────────────────────────────────────────────────────
+.vercel
+
+# ─── Prisma Generated Client ─────────────────────────────────────
+/src/generated/prisma
+
+# ─── TypeScript ──────────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── OS Files ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.pem
+
+# ─── Logs ────────────────────────────────────────────────────────
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log
+
+# ─── Editor ──────────────────────────────────────────────────────
+.idea/
+*.swp
+*.swo
