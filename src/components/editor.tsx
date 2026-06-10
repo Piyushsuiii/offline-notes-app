@@ -350,8 +350,8 @@ export function Editor() {
     const editorElement = document.querySelector(".editor-container");
     if (!editorElement) return;
     const onMouseOver = async (e: any) => {
-      const textNode = document.caretPositionFromPoint
-        ? (document.caretPositionFromPoint(e.clientX, e.clientY) as any)?.offsetNode
+      const textNode = (document as any).caretPositionFromPoint
+        ? (document as any).caretPositionFromPoint(e.clientX, e.clientY)?.offsetNode
         : (document as any).caretRangeFromPoint?.(e.clientX, e.clientY)?.startContainer;
       if (textNode && textNode.nodeType === 3) {
         const text = textNode.textContent || "";
