@@ -122,6 +122,9 @@ export function Editor() {
 
   useEffect(() => {
     if (!activeNoteId) return;
+    // Reset immediately so we never use a destroyed doc while the new one loads
+    setDoc(null);
+    setProvider(null);
     const ydoc = new Y.Doc();
     // IndexedDB persistence keeps the Yjs doc in sync with local storage
     new IndexeddbPersistence(`note-${activeNoteId}`, ydoc);
@@ -135,6 +138,9 @@ export function Editor() {
       setProvider(webrtcProvider);
     }, 0);
     return () => {
+      // Reset state so the editor shows loading while the next note's doc loads
+      setDoc(null);
+      setProvider(null);
       ydoc.destroy();
       webrtcProvider.destroy();
     };
@@ -145,18 +151,23 @@ export function Editor() {
     []
   );
 
-  const editor = useCreateBlockNote({
-    collaboration: doc
-      ? { provider: provider as any, fragment: doc.getXmlFragment("document-store"), user: randomUser }
-      : undefined,
-    uploadFile: async (file) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      }),
-  });
+  // Pass [doc] as deps so the editor is recreated with collaboration
+  // once the Yjs doc is ready. Without this, collaboration is never initialized.
+  const editor = useCreateBlockNote(
+    {
+      collaboration: doc
+        ? { provider: provider as any, fragment: doc.getXmlFragment("document-store"), user: randomUser }
+        : undefined,
+      uploadFile: async (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        }),
+    },
+    [doc] // Recreate editor when Yjs doc changes so collaboration is properly set up
+  );
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!activeNoteId) return;
@@ -232,7 +243,7 @@ export function Editor() {
   }, [activeNoteId, editor]);
 
   const handleAIAction = async (type: "summarize" | "fix" | "continue" | "shorten" | "expand" | "translate") => {
-    if (!editor || !navigator.onLine) {
+    if (!navigator.onLine) {
       addToast("AI requires internet connection", "error");
       return;
     }
@@ -255,9 +266,16 @@ export function Editor() {
       const decoder = new TextDecoder();
       let resultText = "";
       const aiBlockId = crypto.randomUUID();
+
+      // Guard against empty document to avoid crash on insertBlocks
+      const lastBlock = editor.document.at(-1);
+      if (!lastBlock) {
+        addToast("Cannot insert AI output into an empty document.", "error");
+        return;
+      }
       editor.insertBlocks(
         [{ id: aiBlockId, type: "paragraph", content: "✨ AI is thinking..." }],
-        editor.document[editor.document.length - 1],
+        lastBlock,
         "after"
       );
       while (true) {
@@ -266,7 +284,7 @@ export function Editor() {
         resultText += decoder.decode(value, { stream: true });
         editor.updateBlock(aiBlockId, { content: `✨ ${resultText}` });
       }
-      editor.updateBlock(aiBlockId, { content: resultText });
+      editor.updateBlock(aiBlockId, { content: resultText || "(No response)" });
       addToast("AI action completed ✓");
     } catch (error) {
       addToast("AI failed to respond. Check your connection.", "error");
@@ -294,9 +312,11 @@ export function Editor() {
     let finalTranscript = "";
     recognition.onstart = () => {
       setIsRecording(true);
-      if (!editor) return;
+      // Guard against empty document to avoid crash on insertBlocks
+      const lastBlock = editor.document.at(-1);
+      if (!lastBlock) return;
       currentBlockId = crypto.randomUUID();
-      editor.insertBlocks([{ id: currentBlockId, type: "paragraph", content: "🎙️ Listening..." }], editor.document[editor.document.length - 1], "after");
+      editor.insertBlocks([{ id: currentBlockId, type: "paragraph", content: "🎙️ Listening..." }], lastBlock, "after");
     };
     recognition.onresult = (event: any) => {
       if (!editor || !currentBlockId) return;
@@ -408,7 +428,7 @@ export function Editor() {
           <div className="text-xs text-white/35 flex items-center gap-2 truncate">
             <span>Workspace / </span>
             <span className="text-white/55 truncate max-w-40">{note?.title || "Untitled"}</span>
-            {provider?.synced && <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e] flex-shrink-0" />}
+            {provider?.connected && <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e] flex-shrink-0" title="Synced" />}
           </div>
 
           <div className="flex items-center gap-1.5">
