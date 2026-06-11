@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import {
   Sparkles, BrainCircuit, Workflow, Globe2, Shield, Zap,
-  FileText, LayoutTemplate, Check, X, Star, ArrowRight,
+  FileText, LayoutTemplate, Check, X, ArrowRight,
 } from "lucide-react";
 
 export default async function LandingPage() {
@@ -183,58 +183,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ─── 6. TESTIMONIALS ─────────────────────────────────────────────────── */}
-      <section className="py-32 bg-zinc-950/60 border-y border-white/5">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-              Loved by <span className="text-indigo-400">thinkers</span>
-            </h2>
-            <p className="text-xl text-zinc-400">Join thousands of people who&apos;ve upgraded how they think.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                avatar: "SA", name: "Sarah Ahmed", handle: "@sarah_dev",
-                stars: 5, color: "from-indigo-500 to-purple-600",
-                text: "Just tried NOTERA and the offline-first approach is mind-blowing. Built my entire research database during a 10-hour flight. Zero loading, zero lag.",
-              },
-              {
-                avatar: "MK", name: "Marcus Klein", handle: "@marcus_builds",
-                stars: 5, color: "from-blue-500 to-cyan-600",
-                text: "The 3D graph view completely changed how I connect ideas. This is what Notion should have built years ago. I'm never going back.",
-              },
-              {
-                avatar: "PS", name: "Priya Sharma", handle: "@priya_ai",
-                stars: 5, color: "from-purple-500 to-pink-600",
-                text: "The AI chat that searches *your own notes* semantically is unreal. It found connections between notes I didn't even realize I had made.",
-              },
-            ].map((t, i) => (
-              <div
-                key={i}
-                className="p-6 rounded-2xl bg-white/3 border border-white/8 hover:border-white/15 transition-all hover:bg-white/5"
-              >
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(t.stars)].map((_, s) => (
-                    <Star key={s} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-white/75 text-sm leading-relaxed mb-5">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-xs font-bold text-white flex-shrink-0`}>
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-white/90">{t.name}</div>
-                    <div className="text-xs text-white/40">{t.handle}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ─── 7. COMPARISON TABLE ─────────────────────────────────────────────── */}
       <section className="py-32 px-6 max-w-5xl mx-auto">
